@@ -1,0 +1,30 @@
+variables:
+  BINARY_NAME: $CI_PROJECT_NAME
+
+.prep_go: &prep_go
+  before_script:
+    - export GL_URL=$(echo $CI_PROJECT_URL | awk -F/ '{print $3}')
+    - export GO_PROJECT_PATH="$GOPATH/src/$GL_URL/$CI_PROJECT_NAMESPACE"
+    - mkdir -p $GO_PROJECT_PATH
+    - ln -s $(pwd) $GO_PROJECT_PATH
+    - export GO_PROJECT_PATH="$GO_PROJECT_PATH/$CI_PROJECT_NAME"
+    - cd $GO_PROJECT_PATH
+
+stages:
+  - build
+#  - dockerbuild
+#  - taglatest
+
+go_build:
+  <<: *prep_go
+  stage: build
+  image: golang:1.11
+  script:
+    - go get github.com/golang/dep/cmd/dep
+    - dep ensure
+    - mkdir build
+    - env GOOS=linux GOARCH=amd64 go build
+  artifacts:
+    paths:
+      - build/
+    expire_in: 1 week
