@@ -5,6 +5,7 @@ variables:
   before_script:
     - export GL_URL=$(echo $CI_PROJECT_URL | awk -F/ '{print $3}')
     - export GO_PROJECT_PATH="$GOPATH/src/$GL_URL/$CI_PROJECT_NAMESPACE"
+    - echo Working on ${GO_PROJECT_PATH}
     - mkdir -p $GO_PROJECT_PATH
     - ln -s $(pwd) $GO_PROJECT_PATH
     - export GO_PROJECT_PATH="$GO_PROJECT_PATH/$CI_PROJECT_NAME"
