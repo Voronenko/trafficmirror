@@ -1,6 +1,6 @@
 FROM alpine:3.7
 
-ADD build/trafficmirror
+ADD build/trafficmirror /trafficmirror
 
 CMD ["trafficmirror"]
 
