@@ -17,7 +17,7 @@ variables:
 
 stages:
   - build
-  - dockerbuild
+  - docker_build
 #  - taglatest
 
 go_build:
