@@ -4,11 +4,15 @@ variables:
 
 .prep_go: &prep_go
   before_script:
-    - export GL_URL=$(echo $CI_PROJECT_URL | awk -F/ '{print $3}')
+    - export GL_URL=$(echo ${CI_PROJECT_URL:-https://github.com/rb3ckers/trafficmirror} | awk -F/ '{print $3}')
+    - echo $GL_URL
+    - echo export GO_PROJECT_PATH="$GOPATH/src/$GL_URL/$GO_PROJECT_NAMESPACE"
     - export GO_PROJECT_PATH="$GOPATH/src/$GL_URL/$GO_PROJECT_NAMESPACE"
-    - echo Working on ${GO_PROJECT_PATH}
-    - mkdir -p $GO_PROJECT_PATH
+    - rm -rf $GOPATH/src/$GL_URL
+    - mkdir -p $GOPATH/src/$GL_URL
+    - echo ln -s $(pwd) $GO_PROJECT_PATH
     - ln -s $(pwd) $GO_PROJECT_PATH
+    - echo  export GO_PROJECT_PATH="$GO_PROJECT_PATH/$CI_PROJECT_NAME"
     - export GO_PROJECT_PATH="$GO_PROJECT_PATH/$CI_PROJECT_NAME"
     - cd $GO_PROJECT_PATH
 
@@ -22,9 +26,10 @@ go_build:
   stage: build
   image: golang:1.11
   script:
-#    - go get github.com/golang/dep/cmd/dep
-#    - dep ensure
+    - go get github.com/golang/dep/cmd/dep
+    - dep ensure
     - mkdir -p build
+    - ls -la $GO_PROJECT_PATH
     - env GOOS=linux GOARCH=amd64 go build
   artifacts:
     paths:
