@@ -20,9 +20,9 @@ go_build:
   stage: build
   image: golang:1.11
   script:
-    - go get github.com/golang/dep/cmd/dep
-    - dep ensure
-    - mkdir build
+#    - go get github.com/golang/dep/cmd/dep
+#    - dep ensure
+    - mkdir -p build
     - env GOOS=linux GOARCH=amd64 go build
   artifacts:
     paths:
