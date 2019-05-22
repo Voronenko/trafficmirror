@@ -30,7 +30,8 @@ go_build:
     - dep ensure
     - mkdir -p build
     - ls -la $GO_PROJECT_PATH
-    - env GOOS=linux GOARCH=amd64 go build
+    - env GOOS=linux GOARCH=amd64 go build -o build
+    - ls -la build/
   artifacts:
     paths:
       - build/
