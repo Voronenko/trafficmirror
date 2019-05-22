@@ -38,6 +38,8 @@ go_build:
 docker_build:
   stage: docker_build
   image: docker:latest
+  dependencies:
+    - go_build
   services:
     - docker:dind
 
