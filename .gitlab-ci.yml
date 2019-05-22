@@ -1,10 +1,11 @@
 variables:
   BINARY_NAME: $CI_PROJECT_NAME
+  GO_PROJECT_NAMESPACE: rb3ckers  # $CI_PROJECT_NAMESPACE
 
 .prep_go: &prep_go
   before_script:
     - export GL_URL=$(echo $CI_PROJECT_URL | awk -F/ '{print $3}')
-    - export GO_PROJECT_PATH="$GOPATH/src/$GL_URL/$CI_PROJECT_NAMESPACE"
+    - export GO_PROJECT_PATH="$GOPATH/src/$GL_URL/$GO_PROJECT_NAMESPACE"
     - echo Working on ${GO_PROJECT_PATH}
     - mkdir -p $GO_PROJECT_PATH
     - ln -s $(pwd) $GO_PROJECT_PATH
