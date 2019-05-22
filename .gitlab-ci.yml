@@ -26,10 +26,9 @@ go_build:
     - go get github.com/golang/dep/cmd/dep
     - dep ensure
     - mkdir -p build
-    - ls -la $GO_PROJECT_PATH
-    - env GOOS=linux GOARCH=amd64 go build -o build
-    - ls -la build/
+    - env GOOS=linux GOARCH=amd64 go build -o build/trafficmirror
+    - ls -la $GO_PROJECT_PATH/
   artifacts:
     paths:
-      - build/
+      - build
     expire_in: 1 week
