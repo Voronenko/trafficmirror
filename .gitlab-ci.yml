@@ -1,19 +1,16 @@
 variables:
-  BINARY_NAME: $CI_PROJECT_NAME
-  GO_PROJECT_NAMESPACE: rb3ckers  # $CI_PROJECT_NAMESPACE
+  GL_URL: github.com/rb3ckers
+  GO_PROJECT_NAMESPACE: trafficmirror
 
 .prep_go: &prep_go
   before_script:
-    - export GL_URL=$(echo ${CI_PROJECT_URL:-https://github.com/rb3ckers/trafficmirror} | awk -F/ '{print $3}')
-    - echo $GL_URL
+#    - export GL_URL=$(echo ${CI_PROJECT_URL:-https://github.com/rb3ckers/trafficmirror} | awk -F/ '{print $3}')
     - echo export GO_PROJECT_PATH="$GOPATH/src/$GL_URL/$GO_PROJECT_NAMESPACE"
     - export GO_PROJECT_PATH="$GOPATH/src/$GL_URL/$GO_PROJECT_NAMESPACE"
     - rm -rf $GOPATH/src/$GL_URL
     - mkdir -p $GOPATH/src/$GL_URL
     - echo ln -s $(pwd) $GO_PROJECT_PATH
     - ln -s $(pwd) $GO_PROJECT_PATH
-    - echo  export GO_PROJECT_PATH="$GO_PROJECT_PATH/$CI_PROJECT_NAME"
-    - export GO_PROJECT_PATH="$GO_PROJECT_PATH/$CI_PROJECT_NAME"
     - cd $GO_PROJECT_PATH
 
 stages:
