@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM debian:stretch
 
 ADD build/trafficmirror /trafficmirror
 
