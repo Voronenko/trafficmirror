@@ -15,6 +15,9 @@ type Config struct {
 	PersistentFailureTimeout int      `yaml:"fail-after" default:"30"`
 	RetryAfter               int      `yaml:"retry-after" default:"1"`
 	Mirrors                  []string `yaml:"mirror"`
+	MaxQueuedRequests        int      `yaml:"max-queued-requests" default:"500"`
+	MainTargetDelayMs        int      `yaml:"main-target-delay-ms" default:"0"`
+	EnablePProf              bool     `yaml:"enable-pprof" default:"false"`
 }
 
 func (s *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {

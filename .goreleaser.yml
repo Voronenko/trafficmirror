@@ -1,3 +1,4 @@
+version: 2
 project_name: trafficmirror
 release:
   github:
@@ -19,7 +20,7 @@ builds:
 checksum:
   name_template: checksums.txt
 snapshot:
-  name_template: "{{ .Tag }}-next"
+  version_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
   filters:
@@ -27,8 +28,7 @@ changelog:
     - "^docs:"
     - "^test:"
 dockers:
-  -
-    goos: linux
+  - goos: linux
     goarch: amd64
     dockerfile: Dockerfile.goreleaser
     build_flag_templates:
@@ -37,7 +37,8 @@ dockers:
       - "--label=org.opencontainers.image.revision={{.FullCommit}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
     image_templates:
-    - quay.io/stackstate/trafficmirror:latest
-    - quay.io/stackstate/trafficmirror:{{ .Tag }}
-    - quay.io/stackstate/trafficmirror:v{{ .Major }}
-    - quay.io/stackstate/trafficmirror:v{{ .Major }}.{{ .Minor }}
+      - "{{ .Env.REGISTRY }}/{{ .Env.IMAGE_NAME }}:latest"
+      - "{{ .Env.REGISTRY }}/{{ .Env.IMAGE_NAME }}:latest"
+      - "{{ .Env.REGISTRY }}/{{ .Env.IMAGE_NAME }}:{{ .Tag }}"
+      - "{{ .Env.REGISTRY }}/{{ .Env.IMAGE_NAME }}:v{{ .Major }}"
+      - "{{ .Env.REGISTRY }}/{{ .Env.IMAGE_NAME }}:v{{ .Major }}.{{ .Minor }}"

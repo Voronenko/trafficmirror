@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/pprof"
 	"net/url"
 	"strings"
 	"sync"
@@ -14,6 +15,8 @@ import (
 
 	"github.com/rb3ckers/trafficmirror/internal/config"
 	"github.com/rb3ckers/trafficmirror/internal/mirror"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 type Proxy struct {
@@ -42,7 +45,9 @@ func (p *Proxy) Start(ctx context.Context) error {
 
 	url, _ := url.Parse(p.cfg.MainProxyTarget)
 	mirrorMux := http.NewServeMux()
-	p.httpServer = &http.Server{Addr: p.cfg.ListenAddress, Handler: mirrorMux}
+
+	h2s := &http2.Server{}
+	p.httpServer = &http.Server{Addr: p.cfg.ListenAddress, Handler: h2c.NewHandler(mirrorMux, h2s)}
 
 	targetsMux := mirrorMux
 	targetsServer := p.httpServer
@@ -58,7 +63,7 @@ func (p *Proxy) Start(ctx context.Context) error {
 		return err
 	}
 
-	mirrorMux.HandleFunc("/", ReverseProxyHandler(p.reflector, url))
+	mirrorMux.HandleFunc("/", ReverseProxyHandler(p.reflector, url, time.Duration(p.cfg.MainTargetDelayMs)*time.Millisecond))
 
 	// start configuration server if needed
 	if p.cfg.TargetsListenAddress != "" {
@@ -102,9 +107,9 @@ func (p *Proxy) mirrorsHandler(res http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodGet {
 		for _, target := range p.reflector.ListMirrors() {
 			if target.State == mirror.StateAlive {
-				fmt.Fprintf(res, "%s: %s\n", target.URL, target.State)
+				fmt.Fprintf(res, "%s: %s -- queued: %d -- processed: %d\n", target.URL, target.State, target.QueuedRequests, target.Epoch)
 			} else {
-				fmt.Fprintf(res, "%s: %s (since: %s)\n", target.URL, target.State, target.FailingSince.UTC().Format(time.RFC3339))
+				fmt.Fprintf(res, "%s: %s (since: %s) -- queued: %d -- processed: %d\n", target.URL, target.State, target.FailingSince.UTC().Format(time.RFC3339), target.QueuedRequests, target.Epoch)
 			}
 		}
 
@@ -179,9 +184,18 @@ func (p *Proxy) setupTargetsMux(targetsMux *http.ServeMux) error {
 	}
 
 	if username != "" && password != "" {
+		log.Printf("/" + p.cfg.TargetsEndpoint + " is basic auth protected, username is '" + username + "'")
 		targetsMux.HandleFunc("/"+p.cfg.TargetsEndpoint, BasicAuth(p.mirrorsHandler, username, password, "Please provide username and password for changing mirror targets"))
 	} else {
 		targetsMux.HandleFunc("/"+p.cfg.TargetsEndpoint, p.mirrorsHandler)
+	}
+
+	if p.cfg.EnablePProf {
+		targetsMux.HandleFunc("/debug/pprof/", pprof.Index)
+		targetsMux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+		targetsMux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+		targetsMux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+		targetsMux.HandleFunc("/debug/pprof/trace", pprof.Trace)
 	}
 
 	return nil
